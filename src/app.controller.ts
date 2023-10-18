@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Put, Delete, Param, Body } from '@nestjs/common';
+import { type } from 'os';
 import { ReportType, data } from 'src/data';
-import { v4 ad uuid} from "uuid"
+import { v4 as uuid } from "uuid"
 
 @Controller('report/:type')
 export class AppController {
@@ -15,12 +16,12 @@ export class AppController {
     const reportType =
       type === 'income' ? ReportType.INCOME : ReportType.EXPENSE;
     return data.report
-      .filter((report) => report.type === reportType) 
+      .filter((report) => report.type === reportType)
       .find((report) => report.id === id);
   }
 
   @Post()
-  createReport(@Body() {amount, source}: { amount: number; source: string }, @Param('type') type: string) {
+  createReport(@Body() { amount, source }: { amount: number; source: string }, @Param('type') type: string) {
     const newReport = {
       id: uuid(),
       source,
@@ -35,8 +36,26 @@ export class AppController {
   }
 
   @Put(':id')
-  updateReport() {
-    return 'Updated';
+  updateReport(
+    @Param('type') type: string,
+    @Param('id') id: string,
+    @Body() { amount, source }: { amount: number; source: string },
+  ) {
+    const reportType =
+      type === 'income' ? ReportType.INCOME : ReportType.EXPENSE;
+    const report = data.report
+      .filter((report) => report.type === reportType)
+      .find((report) => report.id === id);
+
+    if (!report) return;
+
+    const reportIndex = data.report.findIndex((report)=> report.id === id === reportToUpdate.id);
+
+    data.report[reportIndex] = {
+      ...data.report[reportIndex],
+      ...body,
+    };
+    return data.report[reportIndex];
   }
 
   @Delete(':id')
